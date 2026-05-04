@@ -1,0 +1,6 @@
+node_modules/
+.env
+Outputs/
+.DS_Store
+dist/
+build/
