@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../utils/api';
 import { useAuth } from '../context/AuthContext';
 
 const AuditTrail = ({ contractId }) => {
@@ -10,8 +10,7 @@ const AuditTrail = ({ contractId }) => {
     useEffect(() => {
         const fetchLogs = async () => {
             try {
-                const config = { headers: { Authorization: `Bearer ${user.token}` } };
-                const { data } = await axios.get(`http://localhost:5000/api/contracts/${contractId}/audit`, config);
+                const { data } = await api.get(`/contracts/${contractId}/audit`);
                 setLogs(data);
             } catch (error) {
                 console.error("Error fetching audit logs", error);

@@ -1,0 +1,48 @@
+version: '3.8'
+
+services:
+  db:
+    image: mongo:6.0
+    container_name: smart-contract-db
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: smart-contract-backend
+    restart: unless-stopped
+    ports:
+      - "5000:5000"
+    environment:
+      - PORT=5000
+      - MONGO_URI=mongodb://db:27017/contract_management
+      - JWT_SECRET=productionsecretkey999
+      - NODE_ENV=production
+      - CORS_ORIGIN=http://localhost:3000
+    depends_on:
+      - db
+    volumes:
+      - backend-uploads:/app/uploads
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        - VITE_API_URL=http://localhost:5000/api
+        - VITE_SERVER_URL=http://localhost:5000
+    container_name: smart-contract-frontend
+    restart: unless-stopped
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+
+volumes:
+  mongo-data:
+  backend-uploads:

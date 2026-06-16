@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../utils/api';
 import { useAuth } from '../context/AuthContext';
 
 const AdminDashboard = () => {
@@ -20,9 +20,7 @@ const AdminDashboard = () => {
 
     const fetchUsers = async () => {
         try {
-            const { data } = await axios.get('http://localhost:5000/api/auth/users', {
-                headers: { Authorization: `Bearer ${user.token}` }
-            });
+            const { data } = await api.get('/auth/users');
             setUsers(data);
         } catch (error) {
             console.error('Failed to fetch users', error);
@@ -31,9 +29,7 @@ const AdminDashboard = () => {
 
     const fetchRoles = async () => {
         try {
-            const { data } = await axios.get('http://localhost:5000/api/auth/roles', {
-                headers: { Authorization: `Bearer ${user.token}` }
-            });
+            const { data } = await api.get('/auth/roles');
             setRoles(data);
             if (data.length > 0 && !roleId) {
                 setRoleId(data[0]._id);
@@ -48,10 +44,8 @@ const AdminDashboard = () => {
         setMessage('');
         if (!roleId) return setMessage('Please create a role first');
         try {
-            await axios.post('http://localhost:5000/api/auth/employee', {
+            await api.post('/auth/employee', {
                 name, email, password, roleId
-            }, {
-                headers: { Authorization: `Bearer ${user.token}` }
             });
             setMessage('Employee created successfully!');
             setName(''); setEmail(''); setPassword('');
@@ -64,9 +58,7 @@ const AdminDashboard = () => {
     const handleDeleteEmployee = async (id) => {
         if (!window.confirm('Are you sure you want to delete this employee?')) return;
         try {
-            await axios.delete(`http://localhost:5000/api/auth/employee/${id}`, {
-                headers: { Authorization: `Bearer ${user.token}` }
-            });
+            await api.delete(`/auth/employee/${id}`);
             setMessage('Employee deleted successfully');
             fetchUsers();
         } catch (error) {

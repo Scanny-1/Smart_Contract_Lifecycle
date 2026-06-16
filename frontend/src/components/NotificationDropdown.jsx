@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../utils/api';
 import { useAuth } from '../context/AuthContext';
 import { Link } from 'react-router-dom';
 
@@ -11,8 +11,7 @@ const NotificationDropdown = () => {
     useEffect(() => {
         const fetchNotifications = async () => {
             try {
-                const config = { headers: { Authorization: `Bearer ${user.token}` } };
-                const { data } = await axios.get('http://localhost:5000/api/notifications', config);
+                const { data } = await api.get('/notifications');
                 setNotifications(data);
             } catch (err) {
                 console.error('Failed to fetch notifications', err);
@@ -26,8 +25,7 @@ const NotificationDropdown = () => {
 
     const markAsRead = async (id) => {
         try {
-            const config = { headers: { Authorization: `Bearer ${user.token}` } };
-            await axios.put(`http://localhost:5000/api/notifications/${id}/read`, {}, config);
+            await api.put(`/notifications/${id}/read`);
             setNotifications(notifications.map(n => n._id === id ? { ...n, readStatus: true } : n));
         } catch (err) {
             console.error('Failed to mark notification as read', err);

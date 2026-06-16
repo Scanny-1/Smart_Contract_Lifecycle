@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import axios from 'axios';
+import api from '../utils/api';
 import { useAuth } from '../context/AuthContext';
 import AuditTrail from '../components/AuditTrail';
+import { getFileUrl } from '../utils/helpers';
 
 const ContractView = () => {
     const { id } = useParams();
@@ -18,8 +19,7 @@ const ContractView = () => {
     useEffect(() => {
         const fetchContract = async () => {
             try {
-                const config = { headers: { Authorization: `Bearer ${user.token}` } };
-                const { data } = await axios.get(`http://localhost:5000/api/contracts/${id}`, config);
+                const { data } = await api.get(`/contracts/${id}`);
                 setContract(data);
             } catch (err) {
                 setError('Failed to fetch contract details');
@@ -34,9 +34,8 @@ const ContractView = () => {
         let report = prompt(`Please enter your report for this ${status} review:`);
         if (report === null) return;
         try {
-            const config = { headers: { Authorization: `Bearer ${user.token}` } };
-            await axios.put(`http://localhost:5000/api/contracts/${id}/review`, { status, report }, config);
-            const { data } = await axios.get(`http://localhost:5000/api/contracts/${id}`, config);
+            await api.put(`/contracts/${id}/review`, { status, report });
+            const { data } = await api.get(`/contracts/${id}`);
             setContract(data);
         } catch (err) {
             alert(err.response?.data?.message || 'Review failed');
@@ -51,9 +50,8 @@ const ContractView = () => {
         }
 
         try {
-            const config = { headers: { Authorization: `Bearer ${user.token}` } };
-            await axios.put(`http://localhost:5000/api/contracts/${id}/approve`, { status, reason }, config);
-            const { data } = await axios.get(`http://localhost:5000/api/contracts/${id}`, config);
+            await api.put(`/contracts/${id}/approve`, { status, reason });
+            const { data } = await api.get(`/contracts/${id}`);
             setContract(data);
         } catch (err) {
             alert(err.response?.data?.message || 'Action failed');
@@ -63,8 +61,7 @@ const ContractView = () => {
     const handleDelete = async () => {
         if (!window.confirm('Are you sure you want to delete this contract?')) return;
         try {
-            const config = { headers: { Authorization: `Bearer ${user.token}` } };
-            await axios.delete(`http://localhost:5000/api/contracts/${id}`, config);
+            await api.delete(`/contracts/${id}`);
             navigate('/');
         } catch (err) {
             alert(err.response?.data?.message || 'Delete failed');
@@ -77,9 +74,8 @@ const ContractView = () => {
             return;
         }
         try {
-            const config = { headers: { Authorization: `Bearer ${user.token}` } };
-            await axios.put(`http://localhost:5000/api/contracts/${id}/renew`, { newEndDate: renewDate }, config);
-            const { data } = await axios.get(`http://localhost:5000/api/contracts/${id}`, config);
+            await api.put(`/contracts/${id}/renew`, { newEndDate: renewDate });
+            const { data } = await api.get(`/contracts/${id}`);
             setContract(data);
             setShowRenew(false);
         } catch (err) {
@@ -90,9 +86,8 @@ const ContractView = () => {
     const handleSign = async () => {
         if (!window.confirm('By signing, you agree to the terms of this document. This action cannot be undone.')) return;
         try {
-            const config = { headers: { Authorization: `Bearer ${user.token}` } };
-            await axios.post(`http://localhost:5000/api/contracts/${id}/sign`, {}, config);
-            const { data } = await axios.get(`http://localhost:5000/api/contracts/${id}`, config);
+            await api.post(`/contracts/${id}/sign`, {});
+            const { data } = await api.get(`/contracts/${id}`);
             setContract(data);
             alert('Successfully signed document!');
         } catch (err) {
@@ -122,7 +117,7 @@ const ContractView = () => {
         { label: 'Active', active: contract.status === 'Active', success: contract.status === 'Active' }
     ];
 
-    const fileUrl = `http://localhost:5000/${contract.fileURL}`;
+    const fileUrl = getFileUrl(contract.fileURL);
     const isPDF = contract.fileURL.toLowerCase().endsWith('.pdf');
 
     return (
@@ -158,14 +153,14 @@ const ContractView = () => {
                                 
                                 <h4 style={{ color: 'var(--text-muted)', marginTop: '1.5rem', marginBottom: '0.5rem', textTransform: 'uppercase', fontSize: '0.85rem' }}>Documents</h4>
                                 {contract.fileURL && (
-                                    <div><a href={`http://localhost:5000/${contract.fileURL}`} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--primary)' }}>Primary Document</a></div>
+                                    <div><a href={getFileUrl(contract.fileURL)} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--primary)' }}>Primary Document</a></div>
                                 )}
                                 {contract.legalDocuments && contract.legalDocuments.length > 0 && (
                                     <div style={{ marginTop: '0.5rem' }}>
                                         <strong>Legal Docs:</strong>
                                         <ul style={{ margin: '0.2rem 0 0 1rem', padding: 0 }}>
                                             {contract.legalDocuments.map((doc, i) => (
-                                                <li key={i}><a href={`http://localhost:5000/${doc}`} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--primary)' }}>Legal Document {i + 1}</a></li>
+                                                <li key={i}><a href={getFileUrl(doc)} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--primary)' }}>Legal Document {i + 1}</a></li>
                                             ))}
                                         </ul>
                                     </div>
@@ -175,7 +170,7 @@ const ContractView = () => {
                                         <strong>Financial Docs:</strong>
                                         <ul style={{ margin: '0.2rem 0 0 1rem', padding: 0 }}>
                                             {contract.financialDocuments.map((doc, i) => (
-                                                <li key={i}><a href={`http://localhost:5000/${doc}`} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--primary)' }}>Financial Document {i + 1}</a></li>
+                                                <li key={i}><a href={getFileUrl(doc)} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--primary)' }}>Financial Document {i + 1}</a></li>
                                             ))}
                                         </ul>
                                     </div>

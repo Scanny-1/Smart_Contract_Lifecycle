@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const dotenv = require('dotenv');
 const path = require('path');
+const fs = require('fs');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const mongoSanitize = require('express-mongo-sanitize');
@@ -18,11 +19,26 @@ dotenv.config();
 
 const app = express();
 
+// Ensure uploads directory exists
+const uploadsDir = path.join(__dirname, 'uploads');
+if (!fs.existsSync(uploadsDir)) {
+    fs.mkdirSync(uploadsDir, { recursive: true });
+    console.log('Created uploads directory');
+}
+
+// Dynamic CORS configuration
+const corsOrigins = process.env.CORS_ORIGIN 
+    ? process.env.CORS_ORIGIN.split(',').map(origin => origin.trim()) 
+    : ['http://localhost:5173', 'http://localhost:3000'];
+
 // Middleware
 app.use(helmet({
     crossOriginResourcePolicy: false, // allow local uploads to be served
 }));
-app.use(cors());
+app.use(cors({
+    origin: corsOrigins,
+    credentials: true
+}));
 app.use(express.json());
 // app.use(mongoSanitize()); // Removed because it's incompatible with Express 5 (req.query is a getter)
 
@@ -89,7 +105,7 @@ const { Server } = require('socket.io');
 const server = http.createServer(app);
 const io = new Server(server, {
     cors: {
-        origin: "http://localhost:5173", // Vite default port
+        origin: corsOrigins,
         methods: ["GET", "POST", "PUT", "DELETE"]
     }
 });

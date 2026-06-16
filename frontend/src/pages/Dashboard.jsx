@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../utils/api';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement, Title } from 'chart.js';
@@ -26,8 +26,7 @@ const Dashboard = () => {
 
     const loadData = async () => {
         try {
-            const config = { headers: { Authorization: `Bearer ${user.token}` } };
-            const contractsRes = await axios.get('http://localhost:5000/api/contracts', config);
+            const contractsRes = await api.get('/contracts');
             const fetchedContracts = contractsRes.data;
             
             let pending = 0, active = 0, expired = 0, rejected = 0, draft = 0;
@@ -57,8 +56,7 @@ const Dashboard = () => {
             return;
         }
         try {
-            const config = { headers: { Authorization: `Bearer ${user.token}` } };
-            await axios.put(`http://localhost:5000/api/contracts/${renewContract._id}/renew`, { newEndDate: renewDate }, config);
+            await api.put(`/contracts/${renewContract._id}/renew`, { newEndDate: renewDate });
             
             await loadData();
             setRenewContract(null);

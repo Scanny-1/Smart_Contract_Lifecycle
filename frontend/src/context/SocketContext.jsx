@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 import { io } from 'socket.io-client';
 import { useAuth } from './AuthContext';
+import { SERVER_URL } from '../utils/helpers';
 
 const SocketContext = createContext();
 
@@ -16,7 +17,7 @@ export const SocketProvider = ({ children }) => {
 
     useEffect(() => {
         if (user && user.token) {
-            const newSocket = io('http://localhost:5000');
+            const newSocket = io(SERVER_URL);
             
             newSocket.on('connect', () => {
                 newSocket.emit('join', user._id);

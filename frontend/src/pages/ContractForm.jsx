@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import axios from 'axios';
+import api from '../utils/api';
 import { useAuth } from '../context/AuthContext';
 
 const ContractForm = () => {
@@ -26,8 +26,7 @@ const ContractForm = () => {
     useEffect(() => {
         const fetchRoles = async () => {
             try {
-                const config = { headers: { Authorization: `Bearer ${user.token}` } };
-                const { data } = await axios.get('http://localhost:5000/api/auth/roles', config);
+                const { data } = await api.get('/auth/roles');
                 setRoles(data);
             } catch (err) {
                 console.error("Failed to fetch roles");
@@ -38,8 +37,7 @@ const ContractForm = () => {
         if (isEdit) {
             const fetchContract = async () => {
                 try {
-                    const config = { headers: { Authorization: `Bearer ${user.token}` } };
-                    const { data } = await axios.get(`http://localhost:5000/api/contracts/${id}`, config);
+                    const { data } = await api.get(`/contracts/${id}`);
                     
                     if (data.createdBy._id !== user._id) {
                         navigate('/');
@@ -108,14 +106,13 @@ const ContractForm = () => {
             const config = {
                 headers: {
                     'Content-Type': 'multipart/form-data',
-                    Authorization: `Bearer ${user.token}`
                 }
             };
 
             if (isEdit) {
-                await axios.put(`http://localhost:5000/api/contracts/${id}`, formData, config);
+                await api.put(`/contracts/${id}`, formData, config);
             } else {
-                await axios.post('http://localhost:5000/api/contracts', formData, config);
+                await api.post('/contracts', formData, config);
             }
             
             navigate('/');
