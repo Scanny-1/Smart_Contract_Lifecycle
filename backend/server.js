@@ -73,13 +73,13 @@ const initDB = async () => {
         }
 
         const adminRole = await Role.findOne({ name: 'Admin' });
-        const adminExists = await User.findOne({ email: 'scannykomal_nakkala@srmap.edu.in' });
+        const adminExists = await User.findOne({ email: 'Admin@gmail.com' });
         
         if (!adminExists && adminRole) {
             await User.create({
                 name: 'System Admin',
-                email: 'scannykomal_nakkala@srmap.edu.in',
-                password: 'Admin@111',
+                email: 'Admin@gmail.com',
+                password: 'Admin@123',
                 roleId: adminRole._id
             });
             console.log('Default Admin user created successfully.');
